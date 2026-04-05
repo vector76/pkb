@@ -59,6 +59,7 @@ func (kb *KB) EphemeralDir() string     { return filepath.Join(kb.Root, "ephemer
 func (kb *KB) AttachmentsDir() string   { return filepath.Join(kb.Root, "attachments") }
 func (kb *KB) QueueDir() string         { return filepath.Join(kb.Root, "queue") }
 func (kb *KB) LogPath() string          { return filepath.Join(kb.Root, "log.md") }
+func (kb *KB) HeartbeatPath() string    { return filepath.Join(kb.Root, "heartbeat.md") }
 
 // WikiPath returns the full path to a file within the wiki directory.
 func (kb *KB) WikiPath(name string) string {

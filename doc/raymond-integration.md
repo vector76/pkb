@@ -80,7 +80,9 @@ File watching is an optimization for responsiveness. If the SSE connection drops
 
 ## Raymond Liveness
 
-PKB uses a heuristic to determine whether Raymond is running: on every page request, it checks whether any signal files have been sitting in `queue/` longer than a threshold (currently 60 seconds) without being consumed. If so, Raymond is considered inactive and the UI disables conversation submission and operation triggers. If no signal files are pending, PKB optimistically assumes Raymond is available.
+Raymond maintains a heartbeat file at `heartbeat.md` in the knowledge base root. This is an empty file that Raymond touches periodically (e.g. every 10–30 seconds) to signal that it is alive and processing work.
+
+On every page request, PKB checks the mtime of `heartbeat.md`. If the file is missing or its mtime is older than 60 seconds, Raymond is considered inactive and the UI disables conversation submission and operation triggers. If the heartbeat is fresh, Raymond is considered active.
 
 The UI also indicates "waiting for agent response" for any conversation whose reply signal file is still present — i.e., Raymond has been notified but has not yet responded.
 
@@ -90,6 +92,7 @@ Raymond is the sole writer of:
 - Agent turns in conversation files
 - All files in `wiki/`
 - `log.md`
+- `heartbeat.md`
 - Git commits
 
 PKB is the sole writer of:

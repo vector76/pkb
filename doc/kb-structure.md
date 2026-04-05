@@ -20,10 +20,11 @@ The knowledge base is a git repository containing markdown files and attachments
 │   ├── ingest/          <- signal files: conversations queued for ingest
 │   ├── lint             <- signal file: lint requested
 │   └── commit           <- signal file: commit requested
+├── heartbeat.md         <- touched by Raymond periodically to signal liveness
 └── log.md               <- append-only record of ingest and maintenance operations
 ```
 
-The `queue/` directory contains only signal files used for coordination between PKB and Raymond. It is not part of the knowledge base content and should be gitignored.
+The `queue/` directory and `heartbeat.md` are coordination artifacts used by PKB and Raymond. They are not part of the knowledge base content and should be gitignored.
 
 ## Conversation Format
 

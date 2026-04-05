@@ -31,41 +31,13 @@ func CreateCommitSignal(kb *KB) error {
 }
 
 // RaymondActive returns true if Raymond appears to be running.
-// The heuristic: if any signal file is present and was created more than
-// staleThreshold ago without being consumed, Raymond is probably not running.
-// If no signal files are pending, we optimistically assume Raymond is available.
+// Raymond touches heartbeat.md at the knowledge base root periodically.
+// If the file is missing or its mtime is older than staleThreshold,
+// Raymond is considered inactive.
 func RaymondActive(kb *KB, staleThreshold time.Duration) bool {
-	dirs := []string{
-		filepath.Join(kb.QueueDir(), "reply"),
-		filepath.Join(kb.QueueDir(), "ingest"),
+	info, err := os.Stat(kb.HeartbeatPath())
+	if err != nil {
+		return false
 	}
-	singletons := []string{
-		filepath.Join(kb.QueueDir(), "lint"),
-		filepath.Join(kb.QueueDir(), "commit"),
-	}
-
-	paths := append([]string{}, singletons...)
-	for _, d := range dirs {
-		entries, err := os.ReadDir(d)
-		if err != nil {
-			continue
-		}
-		for _, e := range entries {
-			paths = append(paths, filepath.Join(d, e.Name()))
-		}
-	}
-
-	for _, p := range paths {
-		info, err := os.Stat(p)
-		if err != nil {
-			continue
-		}
-		// A signal file older than the threshold that hasn't been consumed
-		// suggests Raymond is not processing work.
-		if time.Since(info.ModTime()) > staleThreshold {
-			return false
-		}
-	}
-
-	return true
+	return time.Since(info.ModTime()) <= staleThreshold
 }
