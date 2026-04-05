@@ -40,7 +40,12 @@ jobs:
           ext=""
           if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
           out="pkb-${GOOS}-${GOARCH}${ext}"
-          go build -trimpath -ldflags="-s -w" -o "$out" .
+          version="${GITHUB_REF_NAME:-dev}"
+          if [[ ! "$version" =~ ^v ]]; then
+            sha="$(git rev-parse --short=8 HEAD)"
+            version="dev (${sha})"
+          fi
+          go build -trimpath -ldflags="-s -w -X 'main.version=${version}'" -o "$out" .
           echo "ARTIFACT=$out" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
