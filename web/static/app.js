@@ -56,7 +56,7 @@
       if (article && content && !document.getElementById('wiki-stale-banner')) {
         var banner = document.createElement('div');
         banner.id = 'wiki-stale-banner';
-        banner.style.cssText = 'background:#fffbe6;padding:0.5rem 1rem;font-size:0.88rem;border-bottom:1px solid #e0e0e0;cursor:pointer;';
+        banner.className = 'wiki-stale-banner';
         banner.textContent = 'This page was updated. Click to reload.';
         banner.onclick = function () { location.reload(); };
         content.prepend(banner);

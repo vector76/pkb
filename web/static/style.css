@@ -12,6 +12,10 @@
   --agent-bg: #f6f6f6;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  --code-bg: rgba(0, 0, 0, 0.06);
+  --waiting-bg: #fffbe6;
+  --waiting-text: #7c6000;
+  --btn-text: #fff;
 }
 
 [data-theme="dark"] {
@@ -23,6 +27,10 @@
   --accent: #c0c0c0;
   --human-bg: #2a2a2a;
   --agent-bg: #222;
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --waiting-bg: #2a2600;
+  --waiting-text: #d4b84a;
+  --btn-text: #111;
 }
 
 body {
@@ -126,8 +134,8 @@ body {
 .wiki-page p { margin-bottom: 0.75rem; }
 .wiki-page a { color: var(--accent); }
 .wiki-page ul, .wiki-page ol { margin: 0.5rem 0 0.75rem 1.5rem; }
-.wiki-page code { font-family: var(--mono); font-size: 0.88em; background: #f0f0f0; padding: 0.1em 0.35em; border-radius: 3px; }
-.wiki-page pre { background: #f0f0f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 0.75rem; }
+.wiki-page code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; }
+.wiki-page pre { background: var(--code-bg); padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 0.75rem; }
 .wiki-page pre code { background: none; padding: 0; }
 .wiki-page table { border-collapse: collapse; margin-bottom: 0.75rem; width: 100%; }
 .wiki-page th, .wiki-page td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; }
@@ -160,16 +168,16 @@ body {
 .turn-body p { margin-bottom: 0.5rem; }
 .turn-body p:last-child { margin-bottom: 0; }
 .turn-body a { color: var(--accent); }
-.turn-body code { font-family: var(--mono); font-size: 0.88em; background: rgba(0,0,0,0.07); padding: 0.1em 0.3em; border-radius: 3px; }
-.turn-body pre { background: rgba(0,0,0,0.07); padding: 0.75rem; border-radius: 5px; overflow-x: auto; font-family: var(--mono); font-size: 0.88em; }
+.turn-body code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 3px; }
+.turn-body pre { background: var(--code-bg); padding: 0.75rem; border-radius: 5px; overflow-x: auto; font-family: var(--mono); font-size: 0.88em; }
 .turn-body pre code { background: none; padding: 0; }
 
 .agent-waiting {
   padding: 0.75rem 1rem;
-  background: #fffbe6;
+  background: var(--waiting-bg);
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
-  color: #7c6000;
+  color: var(--waiting-text);
   font-style: italic;
 }
 
@@ -204,17 +212,17 @@ body {
   border: 1px solid var(--accent);
   border-radius: 4px;
 }
-.attach-label:hover { background: #eff6ff; }
+.attach-label:hover { background: var(--bg); }
 .reply-form button[type=submit] {
   padding: 0.4rem 1rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-text);
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.95rem;
 }
-.reply-form button[type=submit]:hover:not(:disabled) { background: #1d4ed8; }
+.reply-form button[type=submit]:hover:not(:disabled) { background: var(--accent); }
 .reply-form button[type=submit]:disabled { opacity: 0.4; cursor: default; }
 .btn-draft {
   padding: 0.4rem 1rem;
@@ -265,7 +273,7 @@ body {
 .conv-list-header button {
   padding: 0.35rem 0.75rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-text);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -295,7 +303,7 @@ body {
 .search-form button {
   padding: 0.5rem 1rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-text);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -304,6 +312,15 @@ body {
 .result-title { color: var(--accent); font-weight: 600; display: block; margin-bottom: 0.25rem; }
 .result-line { font-size: 0.88rem; color: var(--muted); margin-left: 0.5rem; }
 .result-line code { font-family: var(--mono); }
+
+.wiki-stale-banner {
+  background: var(--waiting-bg);
+  color: var(--waiting-text);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
 
 /* ── Misc ── */
 .empty { color: var(--muted); font-style: italic; }
