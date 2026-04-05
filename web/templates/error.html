@@ -1,0 +1,11 @@
+{{define "error.html"}}
+{{template "base" .}}
+{{end}}
+
+{{define "content"}}
+<div class="error-page">
+  <h1>{{.StatusCode}} {{.StatusText}}</h1>
+  <p>{{.Message}}</p>
+  <a href="javascript:history.back()">Go back</a>
+</div>
+{{end}}

@@ -1,0 +1,45 @@
+{{define "conversation_list.html"}}
+{{template "base" .}}
+{{end}}
+
+{{define "content"}}
+<div class="conv-list-page">
+  <div class="conv-list-header">
+    <h1>Conversations</h1>
+    {{if .RaymondActive}}
+    <form method="POST" action="/conversations/new">
+      <input type="text" name="title" placeholder="New conversation title…" required>
+      <button type="submit">Start</button>
+    </form>
+    {{end}}
+  </div>
+
+  {{if .Conversations}}
+  <h2>Persistent</h2>
+  <ul class="conv-list">
+    {{range .Conversations}}
+    <li>
+      <a href="/conversations/{{.ID}}">{{.Title}}</a>
+      <span class="conv-date">{{.ModTime.Format "2006-01-02"}}</span>
+    </li>
+    {{end}}
+  </ul>
+  {{end}}
+
+  {{if .Ephemeral}}
+  <h2>Ephemeral</h2>
+  <ul class="conv-list">
+    {{range .Ephemeral}}
+    <li>
+      <a href="/ephemeral/{{.ID}}">{{.Title}}</a>
+      <span class="conv-date">{{.ModTime.Format "2006-01-02"}}</span>
+    </li>
+    {{end}}
+  </ul>
+  {{end}}
+
+  {{if and (not .Conversations) (not .Ephemeral)}}
+  <p class="empty">No conversations yet.</p>
+  {{end}}
+</div>
+{{end}}

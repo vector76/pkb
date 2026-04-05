@@ -1,0 +1,41 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} — PKB</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="/wiki/index" class="site-title">PKB</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/wiki/index">Wiki</a></li>
+      <li><a href="/conversations/">Conversations</a></li>
+      <li><a href="/search">Search</a></li>
+      <li><a href="/log">Log</a></li>
+    </ul>
+    <div class="nav-actions">
+      <form method="POST" action="/queue/lint">
+        <button type="submit" {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Lint</button>
+      </form>
+      <form method="POST" action="/queue/commit">
+        <button type="submit" {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Commit</button>
+      </form>
+    </div>
+  </nav>
+  <main class="content">
+    {{block "content" .}}{{end}}
+  </main>
+  <script>
+    window.PKB = {
+      raymondActive: {{.RaymondActive}},
+      pagePath: "{{.PagePath | js}}"
+    };
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
+{{end}}

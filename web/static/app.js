@@ -1,0 +1,113 @@
+(function () {
+  'use strict';
+
+  // ── SSE ──────────────────────────────────────────────────────────────────
+  function connectSSE() {
+    var es = new EventSource('/events');
+
+    es.onmessage = function (e) {
+      try {
+        var ev = JSON.parse(e.data);
+        handleEvent(ev);
+      } catch (_) {}
+    };
+
+    es.onerror = function () {
+      es.close();
+      // Reconnect after 5 seconds.
+      setTimeout(connectSSE, 5000);
+    };
+  }
+
+  function handleEvent(ev) {
+    if (ev.type === 'conversation_updated') {
+      // If we're viewing the conversation that was updated, reload the turns.
+      var conv = document.getElementById('conversation');
+      if (!conv) return;
+
+      var id  = conv.dataset.id;
+      var dir = conv.dataset.dir;
+      var expectedPath = dir + '/' + id + '.md';
+
+      if (ev.path === expectedPath) {
+        // Reload just the turns section via a fetch, or fall back to full reload.
+        reloadTurns(dir, id);
+      }
+    } else if (ev.type === 'wiki_updated') {
+      // Show a stale banner only if this exact page was updated.
+      var pagePath = (window.PKB || {}).pagePath || '';
+      if (ev.path !== pagePath) return;
+
+      var article = document.querySelector('.wiki-page');
+      var content = document.querySelector('.content');
+      if (article && content && !document.getElementById('wiki-stale-banner')) {
+        var banner = document.createElement('div');
+        banner.id = 'wiki-stale-banner';
+        banner.style.cssText = 'background:#fffbe6;padding:0.5rem 1rem;font-size:0.88rem;border-bottom:1px solid #e0e0e0;cursor:pointer;';
+        banner.textContent = 'This page was updated. Click to reload.';
+        banner.onclick = function () { location.reload(); };
+        content.prepend(banner);
+      }
+    }
+  }
+
+  function reloadTurns(dir, id) {
+    var url = '/' + dir + '/' + id + '?fragment=turns';
+    fetch(url)
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (html) {
+        if (!html) { location.reload(); return; }
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        var newTurns = doc.getElementById('turns');
+        var newWaiting = doc.getElementById('agent-waiting');
+        var oldTurns = document.getElementById('turns');
+        var oldWaiting = document.getElementById('agent-waiting');
+
+        if (newTurns && oldTurns) {
+          oldTurns.replaceWith(newTurns);
+        }
+        // Update or remove the waiting indicator.
+        if (oldWaiting) oldWaiting.remove();
+        if (newWaiting) {
+          var form = document.getElementById('reply-form');
+          if (form) form.before(newWaiting);
+        }
+      })
+      .catch(function () { location.reload(); });
+  }
+
+  // ── Attachment injection ─────────────────────────────────────────────────
+  var attachInput = document.getElementById('attachment-input');
+  if (attachInput) {
+    attachInput.addEventListener('change', function () {
+      var file = attachInput.files[0];
+      if (!file) return;
+
+      var form = document.getElementById('reply-form');
+      var textarea = form ? form.querySelector('textarea') : null;
+      if (!textarea) return;
+
+      var fd = new FormData();
+      fd.append('file', file);
+
+      fetch('/attachments/upload', { method: 'POST', body: fd })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.statusText); })
+        .then(function (data) {
+          // Inject the markdown reference into the textarea.
+          var ref = '\n[' + data.name + '](' + data.ref + ')';
+          textarea.value = textarea.value + ref;
+          textarea.focus();
+        })
+        .catch(function (err) {
+          alert('Upload failed: ' + err);
+        });
+
+      // Reset so the same file can be re-selected.
+      attachInput.value = '';
+    });
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  connectSSE();
+}());

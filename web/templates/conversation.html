@@ -1,0 +1,54 @@
+{{define "conversation.html"}}
+{{template "base" .}}
+{{end}}
+
+{{define "content"}}
+<div class="conversation" id="conversation" data-id="{{.Conv.ID}}" data-dir="{{.Conv.Dir}}">
+  <h1 class="conv-title">{{.Conv.Title}}</h1>
+
+  <div class="turns" id="turns">
+    {{range .Turns}}
+    <div class="turn turn-{{.Author}}">
+      <div class="turn-header">
+        <span class="turn-author">{{.Author}}</span>
+        {{if not .Timestamp.IsZero}}
+        <span class="turn-time">{{.Timestamp.Format "2006-01-02 15:04"}}</span>
+        {{end}}
+      </div>
+      <div class="turn-body">{{.Body}}</div>
+    </div>
+    {{end}}
+  </div>
+
+  {{if .WaitingForAgent}}
+  <div class="agent-waiting" id="agent-waiting">Waiting for agent response…</div>
+  {{end}}
+
+  {{if .RaymondActive}}
+  <form class="reply-form" method="POST" action="/conversations/{{.Conv.ID}}/reply{{if eq .Conv.Dir "ephemeral"}}?dir=ephemeral{{end}}" id="reply-form">
+    <textarea name="text" rows="4" placeholder="Your message…" required></textarea>
+    <div class="reply-actions">
+      <label class="attach-label">
+        Attach
+        <input type="file" name="attachment" id="attachment-input" style="display:none">
+      </label>
+      <button type="submit">Send</button>
+    </div>
+  </form>
+  {{else}}
+  <p class="raymond-offline">Raymond is offline — browsing only.</p>
+  {{end}}
+
+  <div class="conv-ops">
+    {{if eq .Conv.Dir "ephemeral"}}
+    <form method="POST" action="/conversations/{{.Conv.ID}}/promote">
+      <button type="submit">Promote &amp; Ingest</button>
+    </form>
+    {{else}}
+    <form method="POST" action="/conversations/{{.Conv.ID}}/ingest">
+      <button type="submit" {{if not .RaymondActive}}disabled{{end}}>Ingest</button>
+    </form>
+    {{end}}
+  </div>
+</div>
+{{end}}
