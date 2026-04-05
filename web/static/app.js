@@ -121,6 +121,35 @@
     });
   }
 
+  // ── Save Draft ───────────────────────────────────────────────────────────
+  var draftBtn = document.getElementById('save-draft-btn');
+  if (draftBtn) {
+    draftBtn.addEventListener('click', function () {
+      var conv = document.getElementById('conversation');
+      if (!conv) return;
+      var id = conv.dataset.id;
+      var dir = conv.dataset.dir;
+      var form = document.getElementById('reply-form');
+      var textarea = form ? form.querySelector('textarea') : null;
+      if (!textarea) return;
+
+      var fd = new FormData();
+      fd.append('text', textarea.value);
+
+      var url = '/conversations/' + id + '/draft';
+      if (dir === 'ephemeral') url += '?dir=ephemeral';
+
+      fetch(url, { method: 'POST', body: fd })
+        .then(function (r) {
+          if (r.ok) {
+            draftBtn.textContent = 'Draft Saved';
+            setTimeout(function () { draftBtn.textContent = 'Save Draft'; }, 1500);
+          }
+        })
+        .catch(function () {});
+    });
+  }
+
   // ── Init ─────────────────────────────────────────────────────────────────
   connectSSE();
 }());

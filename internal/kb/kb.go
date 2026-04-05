@@ -58,6 +58,7 @@ func (kb *KB) ConversationsDir() string { return filepath.Join(kb.Root, "convers
 func (kb *KB) EphemeralDir() string     { return filepath.Join(kb.Root, "ephemeral") }
 func (kb *KB) AttachmentsDir() string   { return filepath.Join(kb.Root, "attachments") }
 func (kb *KB) QueueDir() string         { return filepath.Join(kb.Root, "queue") }
+
 func (kb *KB) LogPath() string          { return filepath.Join(kb.Root, "log.md") }
 func (kb *KB) HeartbeatPath() string    { return filepath.Join(kb.Root, "heartbeat.md") }
 
@@ -70,6 +71,11 @@ func (kb *KB) WikiPath(name string) string {
 // dir should be "conversations" or "ephemeral".
 func (kb *KB) ConversationPath(dir, id string) string {
 	return filepath.Join(kb.Root, dir, id+".md")
+}
+
+// DraftPath returns the full path to a conversation's draft sidecar file.
+func (kb *KB) DraftPath(dir, id string) string {
+	return filepath.Join(kb.Root, dir, id+".draft.md")
 }
 
 // FilePath joins the KB root with a relative path.

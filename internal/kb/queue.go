@@ -30,6 +30,27 @@ func CreateCommitSignal(kb *KB) error {
 	return os.WriteFile(filepath.Join(kb.QueueDir(), "commit"), []byte{}, 0644)
 }
 
+// SaveDraft writes draft text for a conversation as a sidecar file
+// next to the conversation file (e.g. conversations/foo.draft.md).
+func SaveDraft(kb *KB, dir, conversationID, text string) error {
+	return os.WriteFile(kb.DraftPath(dir, conversationID), []byte(text), 0644)
+}
+
+// LoadDraft returns any saved draft text for a conversation.
+// Returns empty string if no draft exists.
+func LoadDraft(kb *KB, dir, conversationID string) string {
+	data, err := os.ReadFile(kb.DraftPath(dir, conversationID))
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
+// DeleteDraft removes a saved draft for a conversation.
+func DeleteDraft(kb *KB, dir, conversationID string) {
+	os.Remove(kb.DraftPath(dir, conversationID))
+}
+
 // RaymondActive returns true if Raymond appears to be running.
 // Raymond touches heartbeat.md at the knowledge base root periodically.
 // If the file is missing or its mtime is older than staleThreshold,

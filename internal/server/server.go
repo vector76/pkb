@@ -101,6 +101,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /ephemeral/{id}", s.handleConversation)
 	s.mux.HandleFunc("POST /conversations/new", s.handleNewConversation)
 	s.mux.HandleFunc("POST /conversations/{id}/reply", s.handleReply)
+	s.mux.HandleFunc("POST /conversations/{id}/draft", s.handleSaveDraft)
 	s.mux.HandleFunc("POST /conversations/{id}/ingest", s.handleIngest)
 	s.mux.HandleFunc("POST /conversations/{id}/promote", s.handlePromote)
 

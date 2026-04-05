@@ -5,12 +5,10 @@
 {{define "content"}}
 <div class="conv-list-header">
     <h1>Conversations</h1>
-    {{if .RaymondActive}}
     <form method="POST" action="/conversations/new">
       <input type="text" name="title" placeholder="New conversation title…" required>
       <button type="submit">Start</button>
     </form>
-    {{end}}
   </div>
 
   {{if .Conversations}}

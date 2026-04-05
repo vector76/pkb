@@ -97,6 +97,7 @@ Raymond is the sole writer of:
 
 PKB is the sole writer of:
 - Human turns in conversation files
+- Draft sidecar files (`*.draft.md`)
 - Files in `attachments/`
 - Signal files in `queue/`
 

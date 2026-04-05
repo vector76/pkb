@@ -188,7 +188,18 @@ body {
   cursor: pointer;
   font-size: 0.95rem;
 }
-.reply-form button[type=submit]:hover { background: #1d4ed8; }
+.reply-form button[type=submit]:hover:not(:disabled) { background: #1d4ed8; }
+.reply-form button[type=submit]:disabled { opacity: 0.4; cursor: default; }
+.btn-draft {
+  padding: 0.4rem 1rem;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.btn-draft:hover { border-color: var(--accent); color: var(--accent); }
 
 .conv-ops {
   margin-top: 1rem;

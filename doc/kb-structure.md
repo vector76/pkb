@@ -10,9 +10,11 @@ The knowledge base is a git repository containing markdown files and attachments
 │   ├── index.md         <- entry point for wiki navigation
 │   └── *.md             <- knowledge articles, cross-linked
 ├── conversations/
-│   └── *.md             <- persistent conversations (human + agent turns)
+│   ├── *.md             <- persistent conversations (human + agent turns)
+│   └── *.draft.md       <- draft sidecar files (in-progress human turns)
 ├── ephemeral/
-│   └── *.md             <- transient conversations, not committed or indexed
+│   ├── *.md             <- transient conversations, not committed or indexed
+│   └── *.draft.md       <- draft sidecar files
 ├── attachments/
 │   └── *                <- files uploaded by the human (PDFs, images, etc.)
 ├── queue/
@@ -24,7 +26,11 @@ The knowledge base is a git repository containing markdown files and attachments
 └── log.md               <- append-only record of ingest and maintenance operations
 ```
 
-The `queue/` directory and `heartbeat.md` are coordination artifacts used by PKB and Raymond. They are not part of the knowledge base content and should be gitignored.
+The `queue/` directory, `heartbeat.md`, and `*.draft.md` sidecar files are coordination artifacts used by PKB. They are not part of the knowledge base content. The KB's `.gitignore` should include:
+
+    queue/
+    heartbeat.md
+    *.draft.md
 
 ## Conversation Format
 
@@ -72,6 +78,14 @@ Raymond is responsible for creating, updating, and cross-linking wiki pages. The
 Attachments are files uploaded by the human — documents, images, data files, or any other binary or text content. They live in `attachments/` and are referenced from conversation turns.
 
 When the human uploads an attachment, PKB writes it to `attachments/` and injects a markdown link into the current conversation turn. The human's message provides the context (e.g. "see this chart"). The attachment and the conversation turn are processed together during ingest.
+
+## Drafts
+
+When the human is composing a conversation turn, they can save a draft before sending. The draft is stored as a sidecar file alongside the conversation: `conversations/foo.draft.md` for `conversations/foo.md`, or `ephemeral/foo.draft.md` for `ephemeral/foo.md`.
+
+The draft file contains the raw text of the in-progress message. When the conversation page is loaded, PKB checks for a draft sidecar and pre-fills the textarea. When the human sends the message, the draft is deleted. Saving an empty draft also deletes the file.
+
+Draft files are ephemeral and should be gitignored (see the `.gitignore` guidance above).
 
 ## Ephemeral Conversations
 

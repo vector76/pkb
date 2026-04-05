@@ -137,11 +137,14 @@ func (s *Server) handleConversation(w http.ResponseWriter, r *http.Request) {
 	_, signalErr := os.Stat(replySignal)
 	waitingForAgent := signalErr == nil
 
+	draft := kb.LoadDraft(s.kb, dir, id)
+
 	type convData struct {
 		baseData
 		Conv            *kb.Conversation
 		Turns           []renderedTurn
 		WaitingForAgent bool
+		Draft           string
 	}
 
 	if err := s.tmpl.conv.ExecuteTemplate(w, "base", convData{
@@ -149,6 +152,7 @@ func (s *Server) handleConversation(w http.ResponseWriter, r *http.Request) {
 		Conv:            conv,
 		Turns:           turns,
 		WaitingForAgent: waitingForAgent,
+		Draft:           draft,
 	}); err != nil {
 		log.Printf("handleConversation: template: %v", err)
 	}
@@ -198,6 +202,7 @@ func (s *Server) handleReply(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, http.StatusInternalServerError, "Could not save message.")
 		return
 	}
+	kb.DeleteDraft(s.kb, dir, id)
 	if err := kb.CreateReplySignal(s.kb, id); err != nil {
 		s.renderError(w, http.StatusInternalServerError, "Could not signal agent — message was saved but agent will not respond.")
 		return
@@ -208,6 +213,25 @@ func (s *Server) handleReply(w http.ResponseWriter, r *http.Request) {
 		prefix = "/ephemeral/"
 	}
 	http.Redirect(w, r, prefix+id, http.StatusSeeOther)
+}
+
+func (s *Server) handleSaveDraft(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	dir := "conversations"
+	if r.URL.Query().Get("dir") == "ephemeral" {
+		dir = "ephemeral"
+	}
+
+	text := r.FormValue("text")
+	if strings.TrimSpace(text) == "" {
+		kb.DeleteDraft(s.kb, dir, id)
+	} else {
+		if err := kb.SaveDraft(s.kb, dir, id, text); err != nil {
+			http.Error(w, "could not save draft", http.StatusInternalServerError)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Server) handleIngest(w http.ResponseWriter, r *http.Request) {
@@ -228,11 +252,16 @@ func (s *Server) handlePromote(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, http.StatusInternalServerError, "Could not promote conversation.")
 		return
 	}
+	// Move draft sidecar if it exists.
+	draftSrc := s.kb.DraftPath("ephemeral", id)
+	draftDst := s.kb.DraftPath("conversations", id)
+	os.Rename(draftSrc, draftDst) // best-effort; no draft is fine
 	if err := kb.CreateIngestSignal(s.kb, id); err != nil {
 		// Rename already succeeded; try to undo it so state stays consistent.
 		if undoErr := os.Rename(dst, src); undoErr != nil {
 			log.Printf("handlePromote: undo rename failed: %v", undoErr)
 		}
+		os.Rename(draftDst, draftSrc) // best-effort undo of draft move
 		s.renderError(w, http.StatusInternalServerError, "Could not queue ingest after promotion.")
 		return
 	}
@@ -364,7 +393,7 @@ func (s *Server) search(query string) []searchResult {
 			return
 		}
 		for _, e := range entries {
-			if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+			if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") || strings.HasSuffix(e.Name(), ".draft.md") {
 				continue
 			}
 			path := filepath.Join(dir, e.Name())

@@ -215,7 +215,7 @@ func ListConversations(dir string) ([]ConversationMeta, error) {
 	}
 	var result []ConversationMeta
 	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") || strings.HasSuffix(e.Name(), ".draft.md") {
 			continue
 		}
 		info, err := e.Info()

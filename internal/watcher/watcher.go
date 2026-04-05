@@ -65,8 +65,9 @@ func (w *Watcher) Start(ctx context.Context) {
 
 // classifyEvent maps a filesystem path to an SSE event.
 func (w *Watcher) classifyEvent(path string) (server.Event, bool) {
-	// Ignore temp files created by atomicWrite.
-	if strings.HasPrefix(filepath.Base(path), ".pkb-tmp-") {
+	base := filepath.Base(path)
+	// Ignore temp files created by atomicWrite and draft sidecar files.
+	if strings.HasPrefix(base, ".pkb-tmp-") || strings.HasSuffix(base, ".draft.md") {
 		return server.Event{}, false
 	}
 
