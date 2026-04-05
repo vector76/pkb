@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"pkb/internal/kb"
-	"pkb/internal/server"
-	"pkb/internal/watcher"
+	"github.com/vector76/pkb/internal/kb"
+	"github.com/vector76/pkb/internal/server"
+	"github.com/vector76/pkb/internal/watcher"
 )
 
 // Set via -ldflags at build time; defaults for plain "go build".

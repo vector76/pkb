@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"pkb/internal/kb"
-	"pkb/internal/server"
+	"github.com/vector76/pkb/internal/kb"
+	"github.com/vector76/pkb/internal/server"
 
 	"github.com/fsnotify/fsnotify"
 )

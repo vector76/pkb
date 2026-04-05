@@ -16,7 +16,7 @@ import (
 	"time"
 	"unicode"
 
-	"pkb/internal/kb"
+	"github.com/vector76/pkb/internal/kb"
 )
 
 // ── Wiki ─────────────────────────────────────────────────────────────────────

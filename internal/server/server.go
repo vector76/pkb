@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"pkb/internal/kb"
-	"pkb/internal/render"
-	"pkb/web"
+	"github.com/vector76/pkb/internal/kb"
+	"github.com/vector76/pkb/internal/render"
+	"github.com/vector76/pkb/web"
 )
 
 const staleThreshold = 60 * time.Second

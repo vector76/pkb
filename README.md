@@ -4,19 +4,38 @@ PKB is a web-based tool for building a personal knowledge base with an LLM as th
 
 Everything is plain markdown files in a git repository. No database.
 
-## Quick Start
+## Install
 
 **Prerequisites:** Go 1.22+
 
-```sh
-# Build
-go build -o pkb .
+### From anywhere (no checkout needed)
 
+```sh
+go install github.com/vector76/pkb@latest
+```
+
+This puts the `pkb` binary in `$GOPATH/bin`.
+
+### From a local checkout
+
+```sh
+git clone https://github.com/vector76/pkb.git
+cd pkb
+go install .
+```
+
+### Pre-built binaries
+
+Download from the [Releases](https://github.com/vector76/pkb/releases) page.
+
+## Quick Start
+
+```sh
 # Run against the current directory (creates the KB structure if needed)
-./pkb
+pkb
 
 # Or specify a directory and listen address
-./pkb -C /path/to/my-kb -addr 127.0.0.1:4242
+pkb -C /path/to/my-kb -addr 127.0.0.1:4242
 ```
 
 Then open http://127.0.0.1:4242 in your browser.
