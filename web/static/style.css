@@ -95,6 +95,21 @@ body {
 }
 .nav-actions button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .nav-actions button:disabled { opacity: 0.4; cursor: default; }
+.theme-toggle {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.theme-toggle:hover {
+  background: var(--bg);
+  color: var(--text);
+}
 
 /* ── Main content ── */
 .content {
