@@ -150,6 +150,32 @@
     });
   }
 
+  var THEME_KEY = 'pkb-theme';
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function updateThemeButton(theme) {
+    var btn = document.getElementById('theme-toggle');
+    if (btn) {
+      btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+  }
+
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var newTheme = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, newTheme);
+    applyTheme(newTheme);
+    updateThemeButton(newTheme);
+  }
+
   // ── Init ─────────────────────────────────────────────────────────────────
   connectSSE();
+  var themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) {
+    updateThemeButton(document.documentElement.getAttribute('data-theme') || 'light');
+    themeBtn.addEventListener('click', toggleTheme);
+  }
 }());
