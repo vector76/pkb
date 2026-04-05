@@ -2,8 +2,17 @@
   'use strict';
 
   // ── SSE ──────────────────────────────────────────────────────────────────
+  //
+  // Close the EventSource on beforeunload so the browser frees the HTTP/1.1
+  // connection slot immediately.  Without this, rapid link clicks can
+  // accumulate lingering SSE connections that exhaust the browser's 6-slot
+  // per-origin limit, stalling navigation for up to ~60 s.
+
+  var es = null;
+
   function connectSSE() {
-    var es = new EventSource('/events');
+    if (es) es.close();
+    es = new EventSource('/events');
 
     es.onmessage = function (e) {
       try {
@@ -14,10 +23,14 @@
 
     es.onerror = function () {
       es.close();
-      // Reconnect after 5 seconds.
+      es = null;
       setTimeout(connectSSE, 5000);
     };
   }
+
+  window.addEventListener('beforeunload', function () {
+    if (es) { es.close(); es = null; }
+  });
 
   function handleEvent(ev) {
     if (ev.type === 'conversation_updated') {
