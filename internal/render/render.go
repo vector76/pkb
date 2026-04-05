@@ -80,6 +80,13 @@ func rewriteLink(dest, linkBase string) (string, bool) {
 		return dest, false
 	}
 
+	// Separate any fragment (e.g. "page.md#section" → "page.md" + "#section").
+	fragment := ""
+	if i := strings.IndexByte(dest, '#'); i >= 0 {
+		fragment = dest[i:]
+		dest = dest[:i]
+	}
+
 	// Strip any leading path components (wiki pages are flat).
 	name := dest
 	if idx := strings.LastIndex(dest, "/"); idx >= 0 {
@@ -88,8 +95,8 @@ func rewriteLink(dest, linkBase string) (string, bool) {
 
 	if strings.HasSuffix(name, ".md") {
 		page := strings.TrimSuffix(name, ".md")
-		return linkBase + page, true
+		return linkBase + page + fragment, true
 	}
 
-	return dest, false
+	return dest + fragment, false
 }

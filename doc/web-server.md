@@ -24,7 +24,7 @@ The entry point for wiki navigation is `wiki/index.md`. From there, navigation i
 Additional navigation views:
 - **Conversation list** — chronological list of all conversations in `conversations/`, with title and date.
 - **Search** — full-text search across wiki pages and conversations. Implemented as a grep over the markdown files; no index required.
-- **Ephemeral conversations** — a separate list of conversations in `ephemeral/`, with the option to promote each to persistent (which queues it for ingest).
+- **Ephemeral conversations** — a separate list of conversations in `ephemeral/`. Opening an ephemeral conversation shows a Promote button that moves it to `conversations/` and queues it for ingest.
 
 ## Conversation UI
 
@@ -37,7 +37,7 @@ At the bottom of an active conversation, the human can type a new message and su
 
 When the SSE event arrives (Raymond has written the agent response), the conversation view updates.
 
-New conversations can be started from the UI. They begin in `ephemeral/`. The human can name the conversation or leave it to be auto-titled.
+New conversations can be started from the UI. They begin in `ephemeral/`. The human provides a title when starting the conversation.
 
 ## Attachments
 
@@ -61,7 +61,7 @@ These buttons are disabled when Raymond is not running (see liveness below).
 
 PKB maintains a file watcher on the knowledge base directory. When Raymond modifies a file, PKB pushes a server-sent event to connected browser clients. The browser uses these events to refresh the relevant view without a full page reload.
 
-The SSE stream is a single endpoint. Events include the type of change (conversation updated, wiki page updated) and the relevant file path. The browser decides whether the current view needs to refresh.
+The SSE stream is a single endpoint (`/events`). Events carry a type (`conversation_updated` or `wiki_updated`) and the relative path of the changed file. The browser compares the event path against the currently-viewed page and acts only when they match: conversation views reload the turn list in place; wiki pages show a "page updated" banner prompting the human to reload. The SSE connection reconnects automatically after a short delay if it drops.
 
 ## Read-Only Mode
 

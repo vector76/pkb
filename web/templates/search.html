@@ -3,28 +3,26 @@
 {{end}}
 
 {{define "content"}}
-<div class="search-page">
-  <h1>Search</h1>
-  <form method="GET" action="/search" class="search-form">
-    <input type="text" name="q" value="{{.Query}}" placeholder="Search…" autofocus>
-    <button type="submit">Search</button>
-  </form>
+<h1>Search</h1>
+<form method="GET" action="/search" class="search-form">
+  <input type="text" name="q" value="{{.Query}}" placeholder="Search…" autofocus>
+  <button type="submit">Search</button>
+</form>
 
-  {{if .Query}}
-    {{if .Results}}
-    <div class="search-results">
-      {{range .Results}}
-      <div class="search-result">
-        <a href="{{.URL}}" class="result-title">{{.Title}}</a>
-        {{range .Lines}}
-        <p class="result-line"><code>{{.}}</code></p>
-        {{end}}
-      </div>
+{{if .Query}}
+  {{if .Results}}
+  <div class="search-results">
+    {{range .Results}}
+    <div class="search-result">
+      <a href="{{.URL}}" class="result-title">{{.Title}}</a>
+      {{range .Lines}}
+      <p class="result-line"><code>{{.}}</code></p>
       {{end}}
     </div>
-    {{else}}
-    <p class="empty">No results for <strong>{{.Query}}</strong>.</p>
     {{end}}
+  </div>
+  {{else}}
+  <p class="empty">No results for <strong>{{.Query}}</strong>.</p>
   {{end}}
-</div>
+{{end}}
 {{end}}

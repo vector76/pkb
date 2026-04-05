@@ -3,8 +3,7 @@
 {{end}}
 
 {{define "content"}}
-<div class="conv-list-page">
-  <div class="conv-list-header">
+<div class="conv-list-header">
     <h1>Conversations</h1>
     {{if .RaymondActive}}
     <form method="POST" action="/conversations/new">
@@ -41,5 +40,4 @@
   {{if and (not .Conversations) (not .Ephemeral)}}
   <p class="empty">No conversations yet.</p>
   {{end}}
-</div>
 {{end}}

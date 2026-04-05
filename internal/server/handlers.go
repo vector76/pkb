@@ -57,10 +57,12 @@ func (s *Server) handleWikiPage(w http.ResponseWriter, r *http.Request) {
 		baseData
 		Body template.HTML
 	}
-	s.tmpl.wiki.ExecuteTemplate(w, "base", wikiData{
+	if err := s.tmpl.wiki.ExecuteTemplate(w, "base", wikiData{
 		baseData: s.newBaseData(title, "wiki/"+page+".md"),
 		Body:     body,
-	})
+	}); err != nil {
+		log.Printf("handleWikiPage: template: %v", err)
+	}
 }
 
 // ── Conversations ─────────────────────────────────────────────────────────────
@@ -82,11 +84,13 @@ func (s *Server) handleConversationList(w http.ResponseWriter, r *http.Request) 
 		Conversations []kb.ConversationMeta
 		Ephemeral     []kb.ConversationMeta
 	}
-	s.tmpl.convList.ExecuteTemplate(w, "base", listData{
+	if err := s.tmpl.convList.ExecuteTemplate(w, "base", listData{
 		baseData:      s.newBaseData("Conversations", ""),
 		Conversations: convs,
 		Ephemeral:     ephs,
-	})
+	}); err != nil {
+		log.Printf("handleConversationList: template: %v", err)
+	}
 }
 
 func (s *Server) handleConversation(w http.ResponseWriter, r *http.Request) {
@@ -140,12 +144,14 @@ func (s *Server) handleConversation(w http.ResponseWriter, r *http.Request) {
 		WaitingForAgent bool
 	}
 
-	s.tmpl.conv.ExecuteTemplate(w, "base", convData{
+	if err := s.tmpl.conv.ExecuteTemplate(w, "base", convData{
 		baseData:        s.newBaseData(conv.Title, dir+"/"+id+".md"),
 		Conv:            conv,
 		Turns:           turns,
 		WaitingForAgent: waitingForAgent,
-	})
+	}); err != nil {
+		log.Printf("handleConversation: template: %v", err)
+	}
 }
 
 func (s *Server) handleNewConversation(w http.ResponseWriter, r *http.Request) {
@@ -224,7 +230,9 @@ func (s *Server) handlePromote(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := kb.CreateIngestSignal(s.kb, id); err != nil {
 		// Rename already succeeded; try to undo it so state stays consistent.
-		os.Rename(dst, src)
+		if undoErr := os.Rename(dst, src); undoErr != nil {
+			log.Printf("handlePromote: undo rename failed: %v", undoErr)
+		}
 		s.renderError(w, http.StatusInternalServerError, "Could not queue ingest after promotion.")
 		return
 	}
@@ -297,10 +305,12 @@ func (s *Server) handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"name": name,
 		"ref":  "../attachments/" + name,
-	})
+	}); err != nil {
+		log.Printf("handleUpload: encode response: %v", err)
+	}
 }
 
 func (s *Server) handleAttachment(w http.ResponseWriter, r *http.Request) {
@@ -335,11 +345,13 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		Query   string
 		Results []searchResult
 	}
-	s.tmpl.search.ExecuteTemplate(w, "base", searchData{
+	if err := s.tmpl.search.ExecuteTemplate(w, "base", searchData{
 		baseData: s.newBaseData("Search", ""),
 		Query:    query,
 		Results:  results,
-	})
+	}); err != nil {
+		log.Printf("handleSearch: template: %v", err)
+	}
 }
 
 func (s *Server) search(query string) []searchResult {
@@ -413,10 +425,12 @@ func (s *Server) handleLog(w http.ResponseWriter, r *http.Request) {
 		baseData
 		Body template.HTML
 	}
-	s.tmpl.wiki.ExecuteTemplate(w, "base", logData{
+	if err := s.tmpl.wiki.ExecuteTemplate(w, "base", logData{
 		baseData: s.newBaseData("Log", "log.md"),
 		Body:     body,
-	})
+	}); err != nil {
+		log.Printf("handleLog: template: %v", err)
+	}
 }
 
 // ── SSE ───────────────────────────────────────────────────────────────────────
@@ -465,7 +479,7 @@ func safeRedirectURL(r *http.Request, fallback string) string {
 		return fallback
 	}
 	path := u.RequestURI()
-	if path == "" || path[0] != '/' {
+	if path == "" || path[0] != '/' || strings.HasPrefix(path, "//") {
 		return fallback
 	}
 	return path

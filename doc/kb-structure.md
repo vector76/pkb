@@ -33,31 +33,32 @@ Example conversation file:
 
     # Conversation Title
 
-    human:
+    ---
+    human: 2026-04-04T14:32:00Z
     I've been reading about sleep and want to understand the relationship
     between REM sleep and memory consolidation.
 
     ---
-    agent:
+    agent: 2026-04-04T14:32:10Z
     REM sleep plays a central role in memory consolidation, particularly for
     procedural and emotional memories...
 
     ---
-    human:
+    human: 2026-04-04T14:35:00Z
     What about declarative memory? I thought slow-wave sleep was more important
     for that.
 
     ---
-    agent:
+    agent: 2026-04-04T14:35:12Z
     You're right. Slow-wave sleep (SWS) is the primary stage for consolidating
     declarative memories...
 
 Rules:
 - `---` on a line by itself is the only turn delimiter. It must not appear within human or agent content.
-- The line immediately after `---` must be `human:` or `agent:` with no leading whitespace.
+- The line immediately after `---` must be `human:` or `agent:`, optionally followed by an RFC3339 timestamp.
 - Content begins on the line after the author tag and continues until the next `---` or end of file.
-- The first turn in a file does not need a preceding `---`; it begins with `human:` on the first content line (after the title).
-- Timestamps and other metadata may be added by the server or Raymond on the author line, e.g. `human: 2026-04-04T14:32:00Z`.
+- PKB always writes a timestamp on human turns. Raymond should write a timestamp on agent turns.
+- The parser is permissive: a first turn without a preceding `---` is accepted, and timestamps are optional. But all PKB-managed files will have `---` before every turn.
 
 ## Wiki Format
 

@@ -74,13 +74,15 @@ The Raymond workflow is designed to handle multiple signal types within a single
 
 ## PKB File Watching
 
-PKB uses the OS file watching facilities available in Go to detect changes made by Raymond. When a conversation file is modified (agent turn appended), PKB pushes an SSE event to any browser clients viewing that conversation. When wiki files change, PKB can invalidate cached renders.
+PKB uses the OS file watching facilities available in Go to detect changes made by Raymond. When a conversation file is modified (agent turn appended), PKB pushes a `conversation_updated` SSE event to any browser clients viewing that conversation, and the browser refreshes the turn list automatically. When a wiki file changes, PKB pushes a `wiki_updated` SSE event and the browser shows a prompt to reload the affected page.
 
-File watching is an optimization for responsiveness. The browser can also poll if SSE is unavailable.
+File watching is an optimization for responsiveness. If the SSE connection drops, it reconnects automatically after a short delay.
 
 ## Raymond Liveness
 
-PKB does not actively monitor whether Raymond is running. If the human submits a turn and no agent response appears after a reasonable time, the lack of response is itself the signal. The UI may indicate "waiting for agent" based on the presence of a signal file with no corresponding response yet. Formal liveness detection can be added later if needed.
+PKB uses a heuristic to determine whether Raymond is running: on every page request, it checks whether any signal files have been sitting in `queue/` longer than a threshold (currently 60 seconds) without being consumed. If so, Raymond is considered inactive and the UI disables conversation submission and operation triggers. If no signal files are pending, PKB optimistically assumes Raymond is available.
+
+The UI also indicates "waiting for agent response" for any conversation whose reply signal file is still present — i.e., Raymond has been notified but has not yet responded.
 
 ## What Raymond Owns
 
