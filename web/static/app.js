@@ -61,6 +61,13 @@
         banner.onclick = function () { location.reload(); };
         content.prepend(banner);
       }
+    } else if (ev.type === 'raymond_status') {
+      window.PKB.raymondActive = ev.active;
+      document.querySelectorAll('[data-raymond-btn]').forEach(function (btn) {
+        btn.disabled = !ev.active;
+      });
+      var offlineMsg = document.querySelector('.raymond-offline');
+      if (offlineMsg) offlineMsg.hidden = ev.active;
     }
   }
 
