@@ -5,22 +5,22 @@
 {{define "content"}}
 <h1>Issues</h1>
 
-{{if .Issues}}
-<ul class="issue-list">
-  {{range .Issues}}
-  <li class="issue-item" data-filename="{{.Filename}}">
-    <div class="issue-header">
-      <strong>{{.Title}}</strong>
-      {{if .Workflow}}<span class="issue-meta">Workflow: {{.Workflow}}</span>{{end}}
-      {{if .Time}}<span class="issue-meta">Time: {{.Time}}</span>{{end}}
-      {{if .Related}}<span class="issue-meta">Related: {{.Related}}</span>{{end}}
-      <button class="issue-delete" data-filename="{{.Filename}}">Delete</button>
-    </div>
-    {{if .BodyHTML}}<div class="issue-body">{{.BodyHTML}}</div>{{end}}
-  </li>
+<p id="no-issues-msg"{{if .Issues}} style="display:none"{{end}}>No open issues.</p>
+
+{{range .Issues}}
+<div class="issue-item">
+  <div class="issue-header">
+    <h2>{{.Title}}</h2>
+    <button class="dismiss-btn" data-filename="{{.Filename}}">Dismiss</button>
+  </div>
+  {{if or .Workflow .Time .Related}}
+  <div class="issue-meta">
+    {{if .Workflow}}<span>Workflow: {{.Workflow}}</span>{{end}}
+    {{if .Time}}<span>Time: {{.Time}}</span>{{end}}
+    {{if .Related}}<span>Related: <a href="/{{.Related}}">{{.Related}}</a></span>{{end}}
+  </div>
   {{end}}
-</ul>
-{{else}}
-<p class="empty">No open issues.</p>
+  <div class="issue-body">{{.BodyHTML}}</div>
+</div>
 {{end}}
 {{end}}
