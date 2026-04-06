@@ -271,15 +271,6 @@ func (s *Server) handlePromote(w http.ResponseWriter, r *http.Request) {
 	draftSrc := s.kb.DraftPath("ephemeral", id)
 	draftDst := s.kb.DraftPath("conversations", id)
 	os.Rename(draftSrc, draftDst) // best-effort; no draft is fine
-	if err := kb.CreateIngestSignal(s.kb, id); err != nil {
-		// Rename already succeeded; try to undo it so state stays consistent.
-		if undoErr := os.Rename(dst, src); undoErr != nil {
-			log.Printf("handlePromote: undo rename failed: %v", undoErr)
-		}
-		os.Rename(draftDst, draftSrc) // best-effort undo of draft move
-		s.renderError(w, http.StatusInternalServerError, "Could not queue ingest after promotion.")
-		return
-	}
 	http.Redirect(w, r, "/conversations/"+id, http.StatusSeeOther)
 }
 

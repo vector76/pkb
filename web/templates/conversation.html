@@ -41,7 +41,7 @@
   <div class="conv-ops">
     {{if eq .Conv.Dir "ephemeral"}}
     <form method="POST" action="/conversations/{{.Conv.ID}}/promote">
-      <button type="submit">Promote &amp; Ingest</button>
+      <button type="submit">Promote</button>
     </form>
     {{else}}
     <form method="POST" action="/conversations/{{.Conv.ID}}/ingest">
