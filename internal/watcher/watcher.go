@@ -36,6 +36,7 @@ func (w *Watcher) Start(ctx context.Context) {
 		w.kb.WikiDir(),
 		w.kb.ConversationsDir(),
 		w.kb.EphemeralDir(),
+		w.kb.IssuesDir(),
 	}
 	for _, d := range dirs {
 		if err := fw.Add(d); err != nil {
@@ -52,6 +53,13 @@ func (w *Watcher) Start(ctx context.Context) {
 				return
 			}
 			if e, ok := w.classifyEvent(event.Name); ok {
+				if e.Type == "issues_updated" {
+					if seen, err := kb.LoadSeen(w.kb); err == nil {
+						if issues, err := kb.ListIssues(w.kb); err == nil {
+							e.UnseenCount = kb.UnseenCount(issues, seen)
+						}
+					}
+				}
 				w.hub.Publish(e)
 			}
 		case err, ok := <-fw.Errors:
@@ -84,6 +92,11 @@ func (w *Watcher) classifyEvent(path string) (server.Event, bool) {
 		return server.Event{Type: "conversation_updated", Path: rel}, true
 	case strings.HasPrefix(rel, "wiki/"):
 		return server.Event{Type: "wiki_updated", Path: rel}, true
+	case strings.HasPrefix(rel, "issues/"):
+		if strings.HasSuffix(base, ".md") && base != ".seen" {
+			return server.Event{Type: "issues_updated"}, true
+		}
+		return server.Event{}, false
 	default:
 		return server.Event{}, false
 	}

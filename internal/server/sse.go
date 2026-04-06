@@ -7,9 +7,10 @@ import (
 
 // Event is pushed to browser clients over SSE.
 type Event struct {
-	Type   string `json:"type"`   // "conversation_updated", "wiki_updated", or "raymond_status"
-	Path   string `json:"path"`   // relative KB path, e.g. "conversations/foo.md"
-	Active bool   `json:"active"` // used by raymond_status events
+	Type        string `json:"type"`         // "conversation_updated", "wiki_updated", or "raymond_status"
+	Path        string `json:"path"`         // relative KB path, e.g. "conversations/foo.md"
+	Active      bool   `json:"active"`       // used by raymond_status events
+	UnseenCount int    `json:"unseen_count"` // used by issues_updated events
 }
 
 // Hub manages SSE subscribers and fans events out to all of them.
