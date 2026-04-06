@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/vector76/pkb/internal/kb"
@@ -155,20 +156,25 @@ func (s *Server) Start(ctx context.Context) error {
 
 // baseData holds fields common to every page template.
 type baseData struct {
-	Title            string
-	PagePath         string
-	RaymondActive    bool
-	UnseenIssueCount int
+	Title             string
+	PagePath          string
+	RaymondActive     bool
+	UnseenIssueCount  int
+	GitignoreStatus   kb.GitignoreStatus
+	GitignoreUncovered string // ", "-joined list of uncovered canonical names
 }
 
 func (s *Server) newBaseData(title, pagePath string) baseData {
 	seen, _ := kb.LoadSeen(s.kb)
 	issues, _ := kb.ListIssues(s.kb)
+	gs := kb.CheckGitignore(s.kb)
 	return baseData{
-		Title:            title,
-		PagePath:         pagePath,
-		RaymondActive:    kb.RaymondActive(s.kb, staleThreshold),
-		UnseenIssueCount: kb.UnseenCount(issues, seen),
+		Title:              title,
+		PagePath:           pagePath,
+		RaymondActive:      kb.RaymondActive(s.kb, staleThreshold),
+		UnseenIssueCount:   kb.UnseenCount(issues, seen),
+		GitignoreStatus:    gs,
+		GitignoreUncovered: strings.Join(gs.Uncovered, ", "),
 	}
 }
 

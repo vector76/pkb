@@ -323,6 +323,14 @@ body {
   cursor: pointer;
 }
 
+.gitignore-warning-banner {
+  background: var(--waiting-bg);
+  color: var(--waiting-text);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+}
+
 /* ── Misc ── */
 .empty { color: var(--muted); font-style: italic; }
 .error-page h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }

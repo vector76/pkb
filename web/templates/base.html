@@ -33,6 +33,11 @@
       <span id="name-error" style="display:none; font-size:0.78rem; color:#c0392b; margin-top:0.25rem;"></span>
     </div>
   </nav>
+  {{if not .GitignoreStatus.IsGitRepo}}
+  <div class="gitignore-warning-banner">Warning: the knowledge base is not a git repository. Run <code>git init</code> in the KB directory to enable version control.</div>
+  {{else if .GitignoreUncovered}}
+  <div class="gitignore-warning-banner">gitignore warning: the following KB paths are not gitignored: {{.GitignoreUncovered}}</div>
+  {{end}}
   <main class="content">
     {{block "content" .}}{{end}}
   </main>
