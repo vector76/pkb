@@ -158,6 +158,23 @@
   }
 
   var THEME_KEY = 'pkb-theme';
+  var NAME_KEY  = 'pkb-name';
+
+  function getStoredName() {
+    return localStorage.getItem(NAME_KEY) || '';
+  }
+
+  function setStoredName(name) {
+    localStorage.setItem(NAME_KEY, name);
+  }
+
+  function clearStoredName() {
+    localStorage.removeItem(NAME_KEY);
+  }
+
+  function isValidName(name) {
+    return /^[\p{L}\p{Nd} .\-']{1,100}$/u.test(name);
+  }
 
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
@@ -184,5 +201,48 @@
   if (themeBtn) {
     updateThemeButton(document.documentElement.getAttribute('data-theme') || 'light');
     themeBtn.addEventListener('click', toggleTheme);
+  }
+
+  // ── Name settings ────────────────────────────────────────────────────────
+  var nameInput = document.getElementById('name-input');
+  var nameSave  = document.getElementById('name-save');
+  var nameError = document.getElementById('name-error');
+
+  if (nameInput) {
+    nameInput.value = getStoredName();
+  }
+
+  if (nameSave) {
+    nameSave.addEventListener('click', function () {
+      var val = nameInput ? nameInput.value.trim() : '';
+      if (val === '') {
+        clearStoredName();
+        if (nameError) nameError.style.display = 'none';
+      } else if (isValidName(val)) {
+        setStoredName(val);
+        if (nameError) nameError.style.display = 'none';
+      } else {
+        if (nameError) {
+          nameError.textContent = 'Name may only contain letters, digits, spaces, dots, hyphens, and apostrophes (max 100 characters).';
+          nameError.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  // ── Reply form name injection ─────────────────────────────────────────────
+  var replyForm = document.getElementById('reply-form');
+  if (replyForm) {
+    replyForm.addEventListener('submit', function () {
+      var name = getStoredName();
+      var hiddenName = replyForm.querySelector('input[name="name"]');
+      if (!hiddenName) {
+        hiddenName = document.createElement('input');
+        hiddenName.type = 'hidden';
+        hiddenName.name = 'name';
+        replyForm.appendChild(hiddenName);
+      }
+      hiddenName.value = name;
+    });
   }
 }());
