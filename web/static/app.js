@@ -68,6 +68,19 @@
       });
       var offlineMsg = document.querySelector('.raymond-offline');
       if (offlineMsg) offlineMsg.hidden = ev.active;
+    } else if (ev.type === 'issues_updated') {
+      var badge = document.getElementById('issues-badge');
+      if (badge) {
+        badge.textContent = ev.unseen_count;
+        if (ev.unseen_count > 0) {
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+      if (window.location.pathname === '/issues') {
+        location.reload();
+      }
     }
   }
 
@@ -229,6 +242,37 @@
       }
     });
   }
+
+  // ── Issue dismiss ────────────────────────────────────────────────────────
+  document.body.addEventListener('click', function(e) {
+    var btn = e.target.closest('.dismiss-btn');
+    if (!btn) return;
+    var filename = btn.dataset.filename;
+    if (!filename) return;
+    fetch('/issues/' + encodeURIComponent(filename), { method: 'DELETE' })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function(data) {
+        // Optimistic DOM removal
+        var item = btn.closest('.issue-item');
+        if (item) item.remove();
+        // Update badge
+        var badge = document.getElementById('issues-badge');
+        if (badge) {
+          badge.textContent = data.unseen_count;
+          if (data.unseen_count > 0) {
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+        // Show empty state if no items remain
+        if (!document.querySelector('.issue-item')) {
+          var msg = document.getElementById('no-issues-msg');
+          if (msg) msg.style.display = '';
+        }
+      })
+      .catch(function() {});
+  });
 
   // ── Reply form name injection ─────────────────────────────────────────────
   var replyForm = document.getElementById('reply-form');
