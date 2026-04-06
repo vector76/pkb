@@ -498,6 +498,93 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ── Issues ────────────────────────────────────────────────────────────────────
+
+type renderedIssue struct {
+	Filename string
+	Title    string
+	Workflow string
+	Time     string
+	Related  string
+	BodyHTML template.HTML
+}
+
+func (s *Server) handleIssueList(w http.ResponseWriter, r *http.Request) {
+	issues, err := kb.ListIssues(s.kb)
+	if err != nil {
+		s.renderError(w, http.StatusInternalServerError, "Could not list issues.")
+		return
+	}
+
+	// Mark all issues as seen before computing base data so the badge reflects zero.
+	seen, _ := kb.LoadSeen(s.kb)
+	if seen == nil {
+		seen = make(map[string]struct{})
+	}
+	for _, m := range issues {
+		seen[m.Filename] = struct{}{}
+	}
+	kb.SaveSeen(s.kb, seen) // best-effort
+
+	base := s.newBaseData("Issues", "issues")
+
+	var rendered []renderedIssue
+	for _, m := range issues {
+		ic, err := kb.ParseIssue(s.kb, m.Filename)
+		if err != nil {
+			log.Printf("handleIssueList: parse %s: %v", m.Filename, err)
+			continue
+		}
+		body, err := s.renderer.RenderMarkdown([]byte(ic.Body))
+		if err != nil {
+			log.Printf("handleIssueList: render %s: %v", m.Filename, err)
+		}
+		rendered = append(rendered, renderedIssue{
+			Filename: m.Filename,
+			Title:    ic.Title,
+			Workflow: ic.Workflow,
+			Time:     ic.Time,
+			Related:  ic.Related,
+			BodyHTML: body,
+		})
+	}
+
+	d := struct {
+		baseData
+		Issues []renderedIssue
+	}{base, rendered}
+
+	if err := s.tmpl.issues.ExecuteTemplate(w, "base", d); err != nil {
+		log.Printf("handleIssueList: template: %v", err)
+	}
+}
+
+func (s *Server) handleDeleteIssue(w http.ResponseWriter, r *http.Request) {
+	filename := r.PathValue("filename")
+	if filename == "" || strings.ContainsAny(filename, "/\\") || strings.Contains(filename, "..") {
+		http.Error(w, "invalid filename", http.StatusBadRequest)
+		return
+	}
+
+	path := filepath.Join(s.kb.IssuesDir(), filename)
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		http.Error(w, "could not delete issue", http.StatusInternalServerError)
+		return
+	}
+
+	seen, _ := kb.LoadSeen(s.kb)
+	delete(seen, filename)
+	kb.SaveSeen(s.kb, seen) // best-effort
+
+	issues, _ := kb.ListIssues(s.kb)
+	unseen := kb.UnseenCount(issues, seen)
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(map[string]int{"unseen_count": unseen}); err != nil {
+		log.Printf("handleDeleteIssue: encode response: %v", err)
+	}
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 // safeRedirectURL returns the path portion of the request's Referer, or

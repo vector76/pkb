@@ -24,6 +24,7 @@ type templates struct {
 	convList *template.Template
 	search   *template.Template
 	errPage  *template.Template
+	issues   *template.Template
 }
 
 // Server is the PKB HTTP server.
@@ -79,6 +80,9 @@ func parseTemplates() (*templates, error) {
 	if t.errPage, err = parse("base.html", "error.html"); err != nil {
 		return nil, err
 	}
+	if t.issues, err = parse("base.html", "issues.html"); err != nil {
+		return nil, err
+	}
 	return &t, nil
 }
 
@@ -119,6 +123,10 @@ func (s *Server) registerRoutes() {
 
 	// SSE.
 	s.mux.HandleFunc("GET /events", s.handleSSE)
+
+	// Issues.
+	s.mux.HandleFunc("GET /issues", s.handleIssueList)
+	s.mux.HandleFunc("DELETE /issues/{filename}", s.handleDeleteIssue)
 }
 
 // Hub returns the SSE hub so the watcher can publish to it.
@@ -147,16 +155,20 @@ func (s *Server) Start(ctx context.Context) error {
 
 // baseData holds fields common to every page template.
 type baseData struct {
-	Title         string
-	PagePath      string
-	RaymondActive bool
+	Title            string
+	PagePath         string
+	RaymondActive    bool
+	UnseenIssueCount int
 }
 
 func (s *Server) newBaseData(title, pagePath string) baseData {
+	seen, _ := kb.LoadSeen(s.kb)
+	issues, _ := kb.ListIssues(s.kb)
 	return baseData{
-		Title:         title,
-		PagePath:      pagePath,
-		RaymondActive: kb.RaymondActive(s.kb, staleThreshold),
+		Title:            title,
+		PagePath:         pagePath,
+		RaymondActive:    kb.RaymondActive(s.kb, staleThreshold),
+		UnseenIssueCount: kb.UnseenCount(issues, seen),
 	}
 }
 

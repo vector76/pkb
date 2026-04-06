@@ -1,0 +1,26 @@
+{{define "issues.html"}}
+{{template "base" .}}
+{{end}}
+
+{{define "content"}}
+<h1>Issues</h1>
+
+{{if .Issues}}
+<ul class="issue-list">
+  {{range .Issues}}
+  <li class="issue-item" data-filename="{{.Filename}}">
+    <div class="issue-header">
+      <strong>{{.Title}}</strong>
+      {{if .Workflow}}<span class="issue-meta">Workflow: {{.Workflow}}</span>{{end}}
+      {{if .Time}}<span class="issue-meta">Time: {{.Time}}</span>{{end}}
+      {{if .Related}}<span class="issue-meta">Related: {{.Related}}</span>{{end}}
+      <button class="issue-delete" data-filename="{{.Filename}}">Delete</button>
+    </div>
+    {{if .BodyHTML}}<div class="issue-body">{{.BodyHTML}}</div>{{end}}
+  </li>
+  {{end}}
+</ul>
+{{else}}
+<p class="empty">No open issues.</p>
+{{end}}
+{{end}}
