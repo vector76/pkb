@@ -78,6 +78,9 @@ func main() {
 	w := watcher.New(srv.Hub(), kbase)
 	go w.Start(ctx)
 
+	p := server.NewRaymondPoller(srv.Hub(), kbase)
+	go p.Start(ctx)
+
 	// Start the HTTP server (blocks until ctx is cancelled).
 	if err := srv.Start(ctx); err != nil {
 		log.Fatalf("pkb: %v", err)
