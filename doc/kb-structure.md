@@ -34,7 +34,7 @@ The `queue/` directory, `heartbeat.md`, and `*.draft.md` sidecar files are coord
 
 ## Conversation Format
 
-Each conversation is a single markdown file. Turns are separated by a horizontal rule (`---` on a line by itself). The line immediately following the `---` identifies the author: `human:` or `agent:`. Content follows on subsequent lines.
+Each conversation is a single markdown file. Turns are separated by a horizontal rule (`---` on a line by itself). The line immediately following the `---` identifies the author: `human:` or `agent:`. Human turns may optionally include a name attribution: `human (Name):`. Content follows on subsequent lines.
 
 Example conversation file:
 
@@ -51,7 +51,7 @@ Example conversation file:
     procedural and emotional memories...
 
     ---
-    human: 2026-04-04T14:35:00Z
+    human (Jamie): 2026-04-04T14:35:00Z
     What about declarative memory? I thought slow-wave sleep was more important
     for that.
 
@@ -62,10 +62,16 @@ Example conversation file:
 
 Rules:
 - `---` on a line by itself is the only turn delimiter. It must not appear within human or agent content.
-- The line immediately after `---` must be `human:` or `agent:`, optionally followed by an RFC3339 timestamp.
+- The line immediately after `---` must be `human:`, `human (Name):`, or `agent:`, optionally followed by an RFC3339 timestamp.
 - Content begins on the line after the author tag and continues until the next `---` or end of file.
 - PKB always writes a timestamp on human turns. Raymond should write a timestamp on agent turns.
 - The parser is permissive: a first turn without a preceding `---` is accepted, and timestamps are optional. But all PKB-managed files will have `---` before every turn.
+
+Name attribution notes:
+- The name is optional. Turns without a name are the default; existing turns are unaffected.
+- Allowed characters: Unicode letters and digits, spaces, dots, hyphens, and single-quotes; 1–100 characters.
+- The name is frozen at write time — it records who authored that turn. Changing or clearing the name in settings affects only subsequent turns, not previously written ones.
+- The name is client-supplied attribution, not authentication.
 
 ## Wiki Format
 
