@@ -34,6 +34,7 @@ func (kb *KB) Init() error {
 		kb.AttachmentsDir(),
 		filepath.Join(kb.QueueDir(), "reply"),
 		filepath.Join(kb.QueueDir(), "ingest"),
+		kb.IssuesDir(),
 	}
 	for _, d := range dirs {
 		if err := os.MkdirAll(d, 0755); err != nil {
@@ -58,6 +59,7 @@ func (kb *KB) ConversationsDir() string { return filepath.Join(kb.Root, "convers
 func (kb *KB) EphemeralDir() string     { return filepath.Join(kb.Root, "ephemeral") }
 func (kb *KB) AttachmentsDir() string   { return filepath.Join(kb.Root, "attachments") }
 func (kb *KB) QueueDir() string         { return filepath.Join(kb.Root, "queue") }
+func (kb *KB) IssuesDir() string        { return filepath.Join(kb.Root, "issues") }
 
 func (kb *KB) LogPath() string          { return filepath.Join(kb.Root, "log.md") }
 func (kb *KB) HeartbeatPath() string    { return filepath.Join(kb.Root, "heartbeat.md") }
