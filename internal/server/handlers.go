@@ -198,9 +198,22 @@ func (s *Server) handleReply(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, http.StatusBadRequest, "Message cannot be empty.")
 		return
 	}
+	name := strings.TrimSpace(r.FormValue("name"))
+	if name != "" {
+		if len([]rune(name)) > 100 {
+			s.renderError(w, http.StatusBadRequest, "Name must be 100 characters or fewer.")
+			return
+		}
+		for _, ch := range name {
+			if !unicode.IsLetter(ch) && !unicode.IsDigit(ch) && ch != ' ' && ch != '.' && ch != '-' && ch != '\'' {
+				s.renderError(w, http.StatusBadRequest, "Name contains invalid characters.")
+				return
+			}
+		}
+	}
 
 	path := s.kb.ConversationPath(dir, id)
-	if err := kb.AppendHumanTurn(path, text, time.Now(), ""); err != nil {
+	if err := kb.AppendHumanTurn(path, text, time.Now(), name); err != nil {
 		s.renderError(w, http.StatusInternalServerError, "Could not save message.")
 		return
 	}
