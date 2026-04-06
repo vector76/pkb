@@ -11,6 +11,7 @@
     <div class="turn turn-{{.Author}}">
       <div class="turn-header">
         <span class="turn-author">{{.Author}}</span>
+        {{if .Name}}<span class="turn-name">{{.Name}}</span>{{end}}
         {{if not .Timestamp.IsZero}}
         <span class="turn-time">{{.Timestamp.Format "2006-01-02 15:04"}}</span>
         {{end}}

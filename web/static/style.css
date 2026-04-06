@@ -165,6 +165,7 @@ body {
   color: var(--muted);
 }
 .turn-time { font-size: 0.78rem; color: var(--muted); }
+.turn-name { font-size: 0.8rem; color: var(--muted); font-style: italic; }
 .turn-body p { margin-bottom: 0.5rem; }
 .turn-body p:last-child { margin-bottom: 0; }
 .turn-body a { color: var(--accent); }

@@ -116,6 +116,7 @@ func (s *Server) handleConversation(w http.ResponseWriter, r *http.Request) {
 	// Render each turn's markdown content.
 	type renderedTurn struct {
 		Author    string
+		Name      string
 		Timestamp time.Time
 		Body      template.HTML
 	}
@@ -127,6 +128,7 @@ func (s *Server) handleConversation(w http.ResponseWriter, r *http.Request) {
 		}
 		turns = append(turns, renderedTurn{
 			Author:    t.Author,
+			Name:      t.Name,
 			Timestamp: t.Timestamp,
 			Body:      body,
 		})
