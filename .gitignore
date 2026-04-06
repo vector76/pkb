@@ -1,7 +1,9 @@
 /pkb
 .env
 .raymond/
+ephemeral/
 issues/
 queue/
 heartbeat.md
 *.draft.md
+.bm/

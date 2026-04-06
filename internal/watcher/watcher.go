@@ -14,8 +14,8 @@ import (
 // snapshot maps absolute file path to last-observed mtime.
 type snapshot map[string]time.Time
 
-// scanDirs scans dirs and returns a snapshot of all classifiable files.
-func scanDirs(dirs []string, classify func(string) (server.Event, bool)) snapshot {
+// scanDirs scans dirs and returns a snapshot of all tracked files.
+func scanDirs(dirs []string, tracked func(string) bool) snapshot {
 	snap := make(snapshot)
 	for _, dir := range dirs {
 		entries, err := os.ReadDir(dir)
@@ -27,7 +27,7 @@ func scanDirs(dirs []string, classify func(string) (server.Event, bool)) snapsho
 				continue
 			}
 			path := filepath.Join(dir, entry.Name())
-			if _, ok := classify(path); !ok {
+			if !tracked(path) {
 				continue
 			}
 			info, err := entry.Info()
@@ -59,7 +59,8 @@ func (w *Watcher) Start(ctx context.Context) {
 		w.kb.EphemeralDir(),
 		w.kb.IssuesDir(),
 	}
-	snap := scanDirs(dirs, w.classifyEvent)
+	tracked := func(path string) bool { _, ok := w.classifyEvent(path); return ok }
+	snap := scanDirs(dirs, tracked)
 
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
@@ -69,27 +70,37 @@ func (w *Watcher) Start(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			fresh := scanDirs(dirs, w.classifyEvent)
+			fresh := scanDirs(dirs, tracked)
 			for path, mtime := range fresh {
 				if snap[path] == mtime {
 					continue
 				}
-				e, ok := w.classifyEvent(path)
-				if !ok {
-					continue
+				w.publishEvent(path)
+			}
+			// Fire events for deleted files.
+			for path := range snap {
+				if _, exists := fresh[path]; !exists {
+					w.publishEvent(path)
 				}
-				if e.Type == "issues_updated" {
-					if seen, err := kb.LoadSeen(w.kb); err == nil {
-						if issues, err := kb.ListIssues(w.kb); err == nil {
-							e.UnseenCount = kb.UnseenCount(issues, seen)
-						}
-					}
-				}
-				w.hub.Publish(e)
 			}
 			snap = fresh
 		}
 	}
+}
+
+func (w *Watcher) publishEvent(path string) {
+	e, ok := w.classifyEvent(path)
+	if !ok {
+		return
+	}
+	if e.Type == "issues_updated" {
+		if seen, err := kb.LoadSeen(w.kb); err == nil {
+			if issues, err := kb.ListIssues(w.kb); err == nil {
+				e.UnseenCount = kb.UnseenCount(issues, seen)
+			}
+		}
+	}
+	w.hub.Publish(e)
 }
 
 // classifyEvent maps a filesystem path to an SSE event.
@@ -114,7 +125,7 @@ func (w *Watcher) classifyEvent(path string) (server.Event, bool) {
 	case strings.HasPrefix(rel, "wiki/"):
 		return server.Event{Type: "wiki_updated", Path: rel}, true
 	case strings.HasPrefix(rel, "issues/"):
-		if strings.HasSuffix(base, ".md") && base != ".seen" {
+		if strings.HasSuffix(base, ".md") {
 			return server.Event{Type: "issues_updated"}, true
 		}
 		return server.Event{}, false
