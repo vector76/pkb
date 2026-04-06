@@ -10,11 +10,13 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // Turn represents one authored segment of a conversation.
 type Turn struct {
 	Author    string    // "human" or "agent"
+	Name      string    // optional display name for human turns
 	Timestamp time.Time // zero if not present on the author line
 	Content   string    // raw markdown text of this turn (trimmed)
 }
@@ -123,7 +125,20 @@ func parseTurn(seg string) (Turn, error) {
 	}
 
 	var author, prefix string
+	var name string
 	switch {
+	case strings.HasPrefix(authorLine, "human ("):
+		author = "human"
+		// Extract name from "human (Name): ..."
+		close := strings.Index(authorLine, "):")
+		if close == -1 {
+			return Turn{}, fmt.Errorf("segment does not begin with human: or agent:")
+		}
+		raw := authorLine[len("human ("):close]
+		if isValidName(raw) {
+			name = raw
+		}
+		prefix = authorLine[:close+2] // "human (Name):"
 	case strings.HasPrefix(authorLine, "human:"):
 		author, prefix = "human", "human:"
 	case strings.HasPrefix(authorLine, "agent:"):
@@ -139,11 +154,30 @@ func parseTurn(seg string) (Turn, error) {
 		}
 	}
 
-	return Turn{Author: author, Timestamp: ts, Content: content}, nil
+	return Turn{Author: author, Name: name, Timestamp: ts, Content: content}, nil
+}
+
+// isValidName reports whether s is a valid turn name: 1–100 chars consisting
+// only of Unicode letters/digits, spaces, dots, hyphens, and single-quotes.
+func isValidName(s string) bool {
+	if len(s) == 0 || len([]rune(s)) > 100 {
+		return false
+	}
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			continue
+		}
+		switch r {
+		case ' ', '.', '-', '\'':
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 // AppendHumanTurn atomically appends a human turn to the conversation file at path.
-func AppendHumanTurn(path string, text string, ts time.Time) error {
+func AppendHumanTurn(path string, text string, ts time.Time, name string) error {
 	var buf bytes.Buffer
 
 	// Read existing content.
@@ -160,7 +194,13 @@ func AppendHumanTurn(path string, text string, ts time.Time) error {
 
 	// Write separator and turn header.
 	buf.WriteString("\n---\n")
-	if ts.IsZero() {
+	if name != "" {
+		if ts.IsZero() {
+			fmt.Fprintf(&buf, "human (%s):\n", name)
+		} else {
+			fmt.Fprintf(&buf, "human (%s): %s\n", name, ts.UTC().Format(time.RFC3339))
+		}
+	} else if ts.IsZero() {
 		buf.WriteString("human:\n")
 	} else {
 		fmt.Fprintf(&buf, "human: %s\n", ts.UTC().Format(time.RFC3339))

@@ -198,7 +198,7 @@ func (s *Server) handleReply(w http.ResponseWriter, r *http.Request) {
 	}
 
 	path := s.kb.ConversationPath(dir, id)
-	if err := kb.AppendHumanTurn(path, text, time.Now()); err != nil {
+	if err := kb.AppendHumanTurn(path, text, time.Now(), ""); err != nil {
 		s.renderError(w, http.StatusInternalServerError, "Could not save message.")
 		return
 	}
