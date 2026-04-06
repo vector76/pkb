@@ -1,3 +1,7 @@
 /pkb
 .env
 .raymond/
+issues/
+queue/
+heartbeat.md
+*.draft.md
