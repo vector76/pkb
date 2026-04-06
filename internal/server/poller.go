@@ -18,11 +18,11 @@ func NewRaymondPoller(hub *Hub, kb *kb.KB) *RaymondPoller {
 	return &RaymondPoller{hub: hub, kb: kb}
 }
 
-// Start polls Raymond liveness every 10 seconds until ctx is cancelled.
+// Start polls Raymond liveness every 500 ms until ctx is cancelled.
 func (p *RaymondPoller) Start(ctx context.Context) {
 	lastActive := kb.RaymondActive(p.kb, staleThreshold)
 
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
