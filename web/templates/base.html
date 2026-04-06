@@ -18,10 +18,10 @@
     </ul>
     <div class="nav-actions">
       <form method="POST" action="/queue/lint">
-        <button type="submit" {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Lint</button>
+        <button type="submit" data-raymond-btn {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Lint</button>
       </form>
       <form method="POST" action="/queue/commit">
-        <button type="submit" {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Commit</button>
+        <button type="submit" data-raymond-btn {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Commit</button>
       </form>
     </div>
     <button id="theme-toggle" class="theme-toggle">🌙</button>

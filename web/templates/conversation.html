@@ -32,12 +32,10 @@
         <input type="file" name="attachment" id="attachment-input" style="display:none">
       </label>
       <button type="button" class="btn-draft" id="save-draft-btn">Save Draft</button>
-      <button type="submit" {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Send</button>
+      <button type="submit" data-raymond-btn {{if not .RaymondActive}}disabled title="Raymond is not running"{{end}}>Send</button>
     </div>
   </form>
-  {{if not .RaymondActive}}
-  <p class="raymond-offline">Raymond is offline — send is disabled.</p>
-  {{end}}
+  <p class="raymond-offline"{{if .RaymondActive}} hidden{{end}}>Raymond is offline — send is disabled.</p>
 
   <div class="conv-ops">
     {{if eq .Conv.Dir "ephemeral"}}
@@ -46,7 +44,7 @@
     </form>
     {{else}}
     <form method="POST" action="/conversations/{{.Conv.ID}}/ingest">
-      <button type="submit" {{if not .RaymondActive}}disabled{{end}}>Ingest</button>
+      <button type="submit" data-raymond-btn {{if not .RaymondActive}}disabled{{end}}>Ingest</button>
     </form>
     {{end}}
   </div>
