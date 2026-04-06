@@ -26,9 +26,11 @@ The knowledge base is a git repository containing markdown files and attachments
 └── log.md               <- append-only record of ingest and maintenance operations
 ```
 
-The `queue/` directory, `heartbeat.md`, and `*.draft.md` sidecar files are coordination artifacts used by PKB. They are not part of the knowledge base content. The KB's `.gitignore` should include:
+The `queue/` directory, `ephemeral/` directory, `issues/` directory, `heartbeat.md`, and `*.draft.md` sidecar files are coordination artifacts used by PKB. They are not part of the knowledge base content. The KB's `.gitignore` should include:
 
+    ephemeral/
     queue/
+    issues/
     heartbeat.md
     *.draft.md
 
