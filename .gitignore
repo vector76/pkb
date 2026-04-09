@@ -7,4 +7,6 @@ queue/
 heartbeat.md
 *.draft.md
 .claude/
+.claude-auth/
 .bm/
+kb/

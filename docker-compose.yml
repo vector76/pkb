@@ -22,7 +22,7 @@ services:
 
   raymond:
     build: .
-    command: ["raymond", "/ray_wf/START.md"]
+    command: ["raymond", "/ray_wf"]
     working_dir: /kb
     volumes:
       - ./kb:/kb
