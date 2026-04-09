@@ -1,0 +1,32 @@
+# Expected directory layout (alongside this file):
+#
+#   .claude-auth/       Claude Code credentials (outside git)
+#   Dockerfile
+#   docker-compose.yml
+#   ray_wf/             Raymond workflow files (outside git)
+#   kb/                 Knowledge base (its own git repo)
+#     .git/
+#     .raymond/
+#     wiki/
+#     conversations/
+#     ...
+
+services:
+  pkb:
+    build: .
+    command: ["pkb", "-C", "/kb", "-addr", "0.0.0.0:4242"]
+    ports:
+      - "4242:4242"
+    volumes:
+      - ./kb:/kb
+
+  raymond:
+    build: .
+    command: ["raymond", "/ray_wf/START.md"]
+    working_dir: /kb
+    volumes:
+      - ./kb:/kb
+      - ./ray_wf:/ray_wf:ro
+      - ./.claude-auth:/home/pkb/.claude
+    depends_on:
+      - pkb
